@@ -1,0 +1,102 @@
+사용자: 고객
+#고객이 받은 할인 쿠폰의 금액을 확인하고자 한다면?
+
+MariaDB [termproject1]> SELECT cu.name, SUM(co.discount) AS '총할인금액'
+    -> FROM customer cu, coupon co
+    -> WHERE cu.c_coupon = co.id
+    -> GROUP BY cu.name;
++--------+------------+
+| name   | 총할인금액 |
++--------+------------+
+| 강한나 |       1000 |
+| 김진주 |       1500 |
++--------+------------+
+2 rows in set (0.010 sec)
+
+
+#고객이 리뷰 별점이 높은 순서대로 가게를 정렬해서 보고 싶다면?
+
+MariaDB [termproject1]> SELECT st_name, star
+    -> FROM review
+    -> ORDER BY star DESC;
++--------------+------+
+| st_name      | star |
++--------------+------+
+| 마시따파스타 |    4 |
+| 동국우동     |    2 |
++--------------+------+
+2 rows in set (0.000 sec)
+
+
+
+
+사용자: 점주
+#하루 매출을 알고 싶다면? 
+MariaDB [termproject1]> SELECT st.name, SUM(me.price * ord.quantity) AS '총매상'
+    -> FROM store st, menu me, `order` ord
+    -> WHERE ord.or_menu = me.name AND me.st_name = st.name
+    -> GROUP BY st.name;
++--------------+--------+
+| name         | 총매상 |
++--------------+--------+
+| 동국우동     |   7500 |
+| 마시따파스타 |  21000 |
++--------------+--------+
+2 rows in set (0.003 sec)
+
+#리뷰를 적어주고 3점 이상 별점을 준 고객이 주문했을 때에만 
+리뷰 이벤트를 제공하려면?
+MariaDB [termproject1]> SELECT st.name, cu.name, ord.or_number
+    -> FROM customer cu, `order` ord, store st, review re
+    -> WHERE re.star >= 3 AND re.cu_id = cu.id AND ord.or_customer = cu.id AND re.st_name = st.name;
++--------------+--------+-----------+
+| name         | name   | or_number |
++--------------+--------+-----------+
+| 마시따파스타 | 김진주 | 0002      |
++--------------+--------+-----------+
+1 row in set (0.002 sec)
+
+
+
+사용자: 배달원
+#우선순위가 가장 높은 가게의 위치를 확인하고 싶다면? 
+
+MariaDB [termproject1]> SELECT reg.priority, reg.st_name, st.address
+    -> FROM register reg, store st
+    -> WHERE reg.st_name = st.name
+    -> ORDER BY priority;
++----------+--------------+---------------------------+
+| priority | st_name      | address                   |
++----------+--------------+---------------------------+
+|        1 | 마시따파스타 | 서울시 중구 장충동 55-2   |
+|        2 | 동국우동     | 서울시 중구 장충동 777-58 |
++----------+--------------+---------------------------+
+2 rows in set (0.000 sec)
+
+
+
+사용자: CS센터 직원
+#배송 지연에 대해 문의를 준 고객에게 배달기사의 출발시간을 알려주고자 한다면?
+
+MariaDB [termproject1]> SELECT cu.name, del.dep_time
+    -> FROM customer cu, complain com, delivery del
+    -> WHERE com.co_issue = '배달 지연 관련' AND com.cu_id = cu.id AND del.or_customer = cu.id;
++--------+---------------------+
+| name   | dep_time            |
++--------+---------------------+
+| 김진주 | 2020-12-25 01:17:32 |
++--------+---------------------+
+1 row in set (0.002 sec)
+
+#위생 관련 문의를 준 고객이 주문한 가게와 주문한 메뉴를 찾고자 한다면?
+
+MariaDB [termproject1]> SELECT cu.name, ord.or_menu, me.st_name
+    -> FROM customer cu, `order`ord, menu me, complain com
+    -> WHERE com.co_issue = '위생 관련' AND com.cu_id = cu.id AND ord.or_customer = cu.id AND ord.or_menu = me.name;
++--------+--------------+--------------+
+| name   | or_menu      | st_name      |
++--------+--------------+--------------+
+| 강한나 | 봉골레파스타 | 마시따파스타 |
++--------+--------------+--------------+
+1 row in set (0.001 sec)
+

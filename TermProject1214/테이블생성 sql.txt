@@ -1,0 +1,443 @@
+MariaDB [(none)]> create database termproject1
+    -> ;
+Query OK, 1 row affected (0.003 sec)
+MariaDB [(none)]> use termproject1
+Database changed
+MariaDB [termproject1]> show tables;
+Empty set (0.001 sec)
+
+MariaDB [termproject1]> CREATE TABLE customer (id CHAR(8) not null, name VARCHAR(20) not null, address VARCHAR(50) not null, phone VARCHAR(14) not null, grade VARCHAR(10) not null DEFAULT 'silver', PRIMARY KEY(id));
+Query OK, 0 rows affected (0.019 sec)
+
+MariaDB [termproject1]> CREATE TABLE coupon (id VARCHAR(20) not null, discount int not null DEFAULT '1000', exp_day DATETIME not null, PRIMARY KEY(id));
+Query OK, 0 rows affected (0.022 sec)
+
+MariaDB [termproject1]> ALTER TABLE customer ADD c_coupon VARCHAR(20) not null;
+Query OK, 0 rows affected (0.017 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> describe customer;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| id       | char(8)     | NO   | PRI | NULL    |       |
+| name     | varchar(20) | NO   |     | NULL    |       |
+| address  | varchar(50) | NO   |     | NULL    |       |
+| phone    | varchar(14) | NO   |     | NULL    |       |
+| grade    | varchar(10) | NO   |     | silver  |       |
+| c_coupon | varchar(20) | NO   |     | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+6 rows in set (0.013 sec)
+
+MariaDB [termproject1]> ALTER TABLE customer ADD CONSTRAINT couponID FOREIGN KEY(c_coupon) REFERENCES coupon(id);
+Query OK, 0 rows affected (0.065 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> describe customer;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| id       | char(8)     | NO   | PRI | NULL    |       |
+| name     | varchar(20) | NO   |     | NULL    |       |
+| address  | varchar(50) | NO   |     | NULL    |       |
+| phone    | varchar(14) | NO   |     | NULL    |       |
+| grade    | varchar(10) | NO   |     | silver  |       |
+| c_coupon | varchar(20) | NO   | MUL | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+6 rows in set (0.007 sec)
+
+MariaDB [termproject1]> ALTER TABLE customer DROP FOREIGN KEY couponID;
+Query OK, 0 rows affected (0.006 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> ALTER TABLE customer ADD CONSTRAINT couponID FOREIGN KEY(c_coupon) REFERENCES coupon(id) ON DELETE SET NULL;
+ERROR 1005 (HY000): Can't create table `termproject1`.`customer` (errno: 150 "Foreign key constraint is incorrectly formed")
+MariaDB [termproject1]> ALTER TABLE customer ADD CONSTRAINT couponID FOREIGN KEY(c_coupon) REFERENCES coupon(id);
+Query OK, 0 rows affected (0.049 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> describe customer;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| id       | char(8)     | NO   | PRI | NULL    |       |
+| name     | varchar(20) | NO   |     | NULL    |       |
+| address  | varchar(50) | NO   |     | NULL    |       |
+| phone    | varchar(14) | NO   |     | NULL    |       |
+| grade    | varchar(10) | NO   |     | silver  |       |
+| c_coupon | varchar(20) | NO   | MUL | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+6 rows in set (0.007 sec)
+
+MariaDB [termproject1]> descrive coupon;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'descrive coupon' at line 1
+MariaDB [termproject1]> describe coupon;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| id       | varchar(20) | NO   | PRI | NULL    |       |
+| discount | int(11)     | NO   |     | 1000    |       |
+| exp_day  | datetime    | NO   |     | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+3 rows in set (0.009 sec)
+
+MariaDB [termproject1]> CREATE TABLE favorite (id CHAR(8) not null, favorite VARCHAR(50) not null, PRIMARY KEY(id), FOREIGN KEY(id) REFERENCES customer(id) ON DELETE CASCADE);
+Query OK, 0 rows affected (0.020 sec)
+
+MariaDB [termproject1]> describe favorite;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| id       | char(8)     | NO   | PRI | NULL    |       |
+| favorite | varchar(50) | NO   |     | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+2 rows in set (0.006 sec)
+
+MariaDB [termproject1]> CREATE TABLE store (name VARCHAR(50) not null, phone VARCHAR(14) not null,address VARCHAR(50) not null, PRIMARY KEY(name));
+Query OK, 0 rows affected (0.020 sec)
+
+MariaDB [termproject1]> CREATE TABLE menu (name VARCHAR(50) not null, price INT not null, st_name VARCHAR(50) not null, PRIMARY KEY(name), FOREIGN KEY (st_name) REFERENCES store(name) ON DELETE CASCADE, CHECK (price > 0));
+Query OK, 0 rows affected (0.020 sec)
+
+MariaDB [termproject1]> describe menu;
++---------+-------------+------+-----+---------+-------+
+| Field   | Type        | Null | Key | Default | Extra |
++---------+-------------+------+-----+---------+-------+
+| name    | varchar(50) | NO   | PRI | NULL    |       |
+| price   | int(11)     | NO   |     | NULL    |       |
+| st_name | varchar(50) | NO   | MUL | NULL    |       |
++---------+-------------+------+-----+---------+-------+
+3 rows in set (0.008 sec)
+
+MariaDB [termproject1]> INSERT INTO coupon VALUES ('S1','1000','2020-11-26'), ('S2','1500','2020-12-25');
+Query OK, 2 rows affected (0.005 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> INSERT INTO customer VALUES ('20000001','강한나','서울시 중구 장충동 13-2 202호','010-1111-2222','silver','S1'),('20000002','김진주','서울시 중구 필동 235-15','010-3333-4444','gold','S2');
+Query OK, 2 rows affected (0.003 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> select * from customer;
++----------+--------+-------------------------------+---------------+--------+----------+
+| id       | name   | address                       | phone         | grade  | c_coupon |
++----------+--------+-------------------------------+---------------+--------+----------+
+| 20000001 | 강한나 | 서울시 중구 장충동 13-2 202호 | 010-1111-2222 | silver | S1       |
+| 20000002 | 김진주 | 서울시 중구 필동 235-15       | 010-3333-4444 | gold   | S2       |
++----------+--------+-------------------------------+---------------+--------+----------+
+2 rows in set (0.002 sec)
+
+MariaDB [termproject1]> select * from coupon
+    -> ;
++----+----------+---------------------+
+| id | discount | exp_day             |
++----+----------+---------------------+
+| S1 |     1000 | 2020-11-26 00:00:00 |
+| S2 |     1500 | 2020-12-25 00:00:00 |
++----+----------+---------------------+
+2 rows in set (0.000 sec)
+
+MariaDB [termproject1]> INSERT INTO favorite VALUES('20000001','떡볶이'),('20000002','피자');
+Query OK, 2 rows affected (0.003 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> describe store;
++---------+-------------+------+-----+---------+-------+
+| Field   | Type        | Null | Key | Default | Extra |
++---------+-------------+------+-----+---------+-------+
+| name    | varchar(50) | NO   | PRI | NULL    |       |
+| phone   | varchar(14) | NO   |     | NULL    |       |
+| address | varchar(50) | NO   |     | NULL    |       |
++---------+-------------+------+-----+---------+-------+
+3 rows in set (0.006 sec)
+
+
+INSERT INTO store VALUES ('마시따파스타','02-555...' at line 1
+MariaDB [termproject1]> INSERT INTO store VALUES ('마시따파스타','02-5555-4444','서울시 중구 장충동 55-2'), ('동국우동','02-3333-2222','서울시 중구 장충동 777-58');
+Query OK, 2 rows affected (0.002 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> select*from store;
++--------------+--------------+---------------------------+
+| name         | phone        | address                   |
++--------------+--------------+---------------------------+
+| 동국우동     | 02-3333-2222 | 서울시 중구 장충동 777-58 |
+| 마시따파스타 | 02-5555-4444 | 서울시 중구 장충동 55-2   |
++--------------+--------------+---------------------------+
+2 rows in set (0.000 sec)
+
+MariaDB [termproject1]> INSERT INTO menu VALUES ('김치우동',5000,'동국우동'),('튀김우동',7500,'동국우동'),('봉골레파스타',10500,'마시따파스타');
+Query OK, 3 rows affected (0.003 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> CREATE TABLE `order`
+    -> (or_customer CHAR(8) not null,
+    -> or_menu VARCHAR(50) not null,
+    -> quantity INT NOT NULL DEFAULT 1,
+    -> date DATETIME NOT NULL,
+    -> FOREIGN KEY (or_customer) REFERENCES customer(id),
+    -> FOREIGN KEY (or_menu) REFERENCES menu(name));
+Query OK, 0 rows affected (0.027 sec)
+
+MariaDB [termproject1]> select * from `order`;
+Empty set (0.003 sec)
+
+MariaDB [termproject1]> describe `order`;
++-------------+-------------+------+-----+---------+-------+
+| Field       | Type        | Null | Key | Default | Extra |
++-------------+-------------+------+-----+---------+-------+
+| or_customer | char(8)     | NO   | MUL | NULL    |       |
+| or_menu     | varchar(50) | NO   | MUL | NULL    |       |
+| quantity    | int(11)     | NO   |     | 1       |       |
+| date        | datetime    | NO   |     | NULL    |       |
++-------------+-------------+------+-----+---------+-------+
+4 rows in set (0.004 sec)
+
+MariaDB [termproject1]> ALTER TABLE `order` ADD CONSTRAINT CHK_QUA CHECK (quantity >=1);
+Query OK, 0 rows affected (0.051 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> CREATE TABLE review
+    -> (number INT not null,
+    -> cu_id CHAR(8) not null,
+    -> st_name VARCHAR(50) not null,
+    -> detail VARCHAR(150) not null,
+    -> date DATETIME not null,
+    -> star INT not null DEFAULT 3,
+    -> PRIMARY KEY(number),
+    -> FOREIGN KEY(cu_id) REFERENCES customer(id),
+    -> FOREIGN KEY(st_name) REFERENCES store(name),
+    -> CHECK(star>=0 AND star <= 5));
+Query OK, 0 rows affected (0.025 sec)
+
+MariaDB [termproject1]> desc review;
++---------+--------------+------+-----+---------+-------+
+| Field   | Type         | Null | Key | Default | Extra |
++---------+--------------+------+-----+---------+-------+
+| number  | int(11)      | NO   | PRI | NULL    |       |
+| cu_id   | char(8)      | NO   | MUL | NULL    |       |
+| st_name | varchar(50)  | NO   | MUL | NULL    |       |
+| detail  | varchar(150) | NO   |     | NULL    |       |
+| date    | datetime     | NO   |     | NULL    |       |
+| star    | int(11)      | NO   |     | 3       |       |
++---------+--------------+------+-----+---------+-------+
+6 rows in set (0.007 sec)
+
+MariaDB [termproject1]> INSERT INTO `order` VALUES ('20000001','김치우동',2,'2020-11-26'),('20000002','튀김우동',1,'2020-12-25');
+Query OK, 2 rows affected (0.005 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> select * from `order`;
++-------------+----------+----------+---------------------+
+| or_customer | or_menu  | quantity | date                |
++-------------+----------+----------+---------------------+
+| 20000001    | 김치우동 |        2 | 2020-11-26 00:00:00 |
+| 20000002    | 튀김우동 |        1 | 2020-12-25 00:00:00 |
++-------------+----------+----------+---------------------+
+2 rows in set (0.000 sec)
+
+MariaDB [termproject1]> INSERT INTO review VALUES (1,'20000001','동국우동','별로예요! 배달도 느리고 비싸요.','2020-11-26',2),(2,'20000002','마시따파스타','맛있어요. 양이 좀만 더 많았으면 좋겠네요.','2020-12-25',4);
+Query OK, 2 rows affected (0.003 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> select * from review;
++--------+----------+--------------+-------------------------------------------+---------------------+------+
+| number | cu_id    | st_name      | detail                                    | date                | star |
++--------+----------+--------------+-------------------------------------------+---------------------+------+
+|      1 | 20000001 | 동국우동     | 별로예요! 배달도 느리고 비싸요.           | 2020-11-26 00:00:00 |    2 |
+|      2 | 20000002 | 마시따파스타 | 맛있어요. 양이 좀만 더 많았으면 좋겠네요. | 2020-12-25 00:00:00 |    4 |
++--------+----------+--------------+-------------------------------------------+---------------------+------+
+2 rows in set (0.000 sec)
+
+MariaDB [termproject1]> ALTER TABLE present ADD CONSTRAINT seID FOREIGN KEY(sender_id) REFERENCES customer(id);
+Query OK, 2 rows affected (0.055 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> ALTER TABLE present ADD CONSTRAINT reID FOREIGN KEY(receiver_id) REFERENCES customer(id);
+Query OK, 2 rows affected (0.064 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> CREATE TABLE mark (
+    -> cu_id CHAR(8) not null,
+    -> st_name VARCHAR(50) not null,
+    -> PRIMARY KEY(cu_id),
+    -> FOREIGN KEY(cu_id) REFERENCES customer(id),
+    -> FOREIGN KEy(st_name) REFERENCES store(name));
+Query OK, 0 rows affected (0.017 sec)
+
+MariaDB [termproject1]> INSERT INTO mark VALUES('20000001','마시따파스타'),('20000002','동국우동');
+Query OK, 2 rows affected (0.006 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> CREATE TABLE deliveryhelper (
+    -> id CHAR(8) not null,
+    -> name VARCHAR(20) not null,
+    -> phone VARCHAR(14) not null,
+    -> PRIMARY KEY(id));
+Query OK, 0 rows affected (0.016 sec)
+
+MariaDB [termproject1]> INSERT INTO deliveryhelper VALUES
+    -> ('JA000001','김철수','010-8888-9888'),
+    -> ('SD000002','한안나','010-2582-5828');
+Query OK, 2 rows affected (0.005 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> CREATE TABLE register (
+    -> priority INT not null,
+    -> st_name VARCHAR(50) not null,
+    -> deliveryhelper CHAR(8) not null,
+    -> FOREIGN KEY(st_name) REFERENCES store(name),
+    -> FOREIGN KEY(deliveryhelper) REFERENCES deliveryhelper(id));
+Query OK, 0 rows affected (0.020 sec)
+
+MariaDB [termproject1]> INSERT INTO register VALUES
+    -> (1,'마시따파스타','JA000001'),
+    -> (2,'동국우동','SD000002');
+Query OK, 2 rows affected (0.006 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> select * from deliveryhelper;
++----------+--------+---------------+
+| id       | name   | phone         |
++----------+--------+---------------+
+| JA000001 | 김철수 | 010-8888-9888 |
+| SD000002 | 한안나 | 010-2582-5828 |
++----------+--------+---------------+
+2 rows in set (0.000 sec)
+
+MariaDB [termproject1]> select * from register;
++----------+--------------+----------------+
+| priority | st_name      | deliveryhelper |
++----------+--------------+----------------+
+|        1 | 마시따파스타 | JA000001       |
+|        2 | 동국우동     | SD000002       |
++----------+--------------+----------------+
+2 rows in set (0.000 sec)
+
+MariaDB [termproject1]> CREATE TABLE delivery (
+    -> or_customer CHAR(8) not null,
+    -> arrival VARCHAR(50) not null,
+    -> dep_time DATETIME not null,
+    -> departure VARCHAR(50) not null,
+    -> st_name VARCHAR(50) not null,
+    -> deliveryhelper CHAR(8) not null);
+Query OK, 0 rows affected (0.013 sec)
+
+MariaDB [termproject1]> INSERT INTO delivery VALUES(
+    -> '20000001','서울시 중구 장충동 13-2 202호','2020-11-26 11:20:10','서울시 중구 장충동 55-2','마시따파스타','JA000001'),(
+    -> '20000002','서울시 중구 필동 235-15','2020-12-25 1:17:32','서울시 중구 장충동 235-15','동국우동','SD000002');
+Query OK, 2 rows affected (0.002 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> desc delivery;
++----------------+-------------+------+-----+---------+-------+
+| Field          | Type        | Null | Key | Default | Extra |
++----------------+-------------+------+-----+---------+-------+
+| or_customer    | char(8)     | NO   |     | NULL    |       |
+| arrival        | varchar(50) | NO   |     | NULL    |       |
+| dep_time       | datetime    | NO   |     | NULL    |       |
+| departure      | varchar(50) | NO   |     | NULL    |       |
+| st_name        | varchar(50) | NO   |     | NULL    |       |
+| deliveryhelper | char(8)     | NO   |     | NULL    |       |
++----------------+-------------+------+-----+---------+-------+
+6 rows in set (0.004 sec)
+
+MariaDB [termproject1]> select * from delivery;
++-------------+-------------------------------+---------------------+---------------------------+--------------+----------------+
+| or_customer | arrival                       | dep_time            | departure                 | st_name      | deliveryhelper |
++-------------+-------------------------------+---------------------+---------------------------+--------------+----------------+
+| 20000001    | 서울시 중구 장충동 13-2 202호 | 2020-11-26 11:20:10 | 서울시 중구 장충동 55-2   | 마시따파스타 | JA000001       |
+| 20000002    | 서울시 중구 필동 235-15       | 2020-12-25 01:17:32 | 서울시 중구 장충동 235-15 | 동국우동     | SD000002       |
++-------------+-------------------------------+---------------------+---------------------------+--------------+----------------+
+2 rows in set (0.000 sec)
+
+MariaDB [termproject1]> CREATE TABLE cs_service (
+    -> issue VARCHAR(20) not null,
+    -> charge_p VARCHAR(20) not null);
+Query OK, 0 rows affected (0.016 sec)
+
+MariaDB [termproject1]> INSERT INTO cs_service VALUES
+    -> ('위생 관련','김지연'),
+    -> ('배달 지연 관련','서지수');
+Query OK, 2 rows affected (0.006 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> CREATE TABLE complain (
+    -> cu_id CHAR(8) not null,
+    -> co_issue VARCHAR(50) not null,
+    -> co_chargep VARCHAR(20) not null,
+    -> date DATETIME not null);
+Query OK, 0 rows affected (0.014 sec)
+
+MariaDB [termproject1]> desc cs_service;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| issue    | varchar(50) | NO   |     | NULL    |       |
+| charge_p | varchar(20) | NO   |     | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+2 rows in set (0.004 sec)
+
+MariaDB [termproject1]> select * from cs_service;
++----------------+----------+
+| issue          | charge_p |
++----------------+----------+
+| 위생 관련      | 김지연   |
+| 배달 지연 관련 | 서지수   |
++----------------+----------+
+2 rows in set (0.000 sec)
+
+MariaDB [termproject1]> desc complain;
++------------+-------------+------+-----+---------+-------+
+| Field      | Type        | Null | Key | Default | Extra |
++------------+-------------+------+-----+---------+-------+
+| cu_id      | char(8)     | NO   |     | NULL    |       |
+| co_issue   | varchar(50) | NO   |     | NULL    |       |
+| co_chargep | varchar(20) | NO   |     | NULL    |       |
+| date       | datetime    | NO   |     | NULL    |       |
++------------+-------------+------+-----+---------+-------+
+4 rows in set (0.007 sec)
+
+MariaDB [termproject1]> INSERT INTO complain VALUES
+    -> ('20000001','위생 관련','김지연','2020-11-26'),
+    -> ('20000002','배달 지연 관련','서지수','2020-12-25');
+Query OK, 2 rows affected (0.003 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> select * from complain;
++----------+----------------+------------+---------------------+
+| cu_id    | co_issue       | co_chargep | date                |
++----------+----------------+------------+---------------------+
+| 20000001 | 위생 관련      | 김지연     | 2020-11-26 00:00:00 |
+| 20000002 | 배달 지연 관련 | 서지수     | 2020-12-25 00:00:00 |
++----------+----------------+------------+---------------------+
+2 rows in set (0.000 sec)
+
+MariaDB [termproject1]> ALTER TABLE `order` ADD or_number CHAR(4);
+Query OK, 0 rows affected (0.007 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> desc `order`;
++-------------+-------------+------+-----+---------+-------+
+| Field       | Type        | Null | Key | Default | Extra |
++-------------+-------------+------+-----+---------+-------+
+| or_customer | char(8)     | NO   | MUL | NULL    |       |
+| or_menu     | varchar(50) | NO   | MUL | NULL    |       |
+| quantity    | int(11)     | NO   |     | 1       |       |
+| date        | datetime    | NO   |     | NULL    |       |
+| or_number   | char(4)     | YES  |     | NULL    |       |
++-------------+-------------+------+-----+---------+-------+
+5 rows in set (0.004 sec)
+
+MariaDB [termproject1]> INSERT INTO `order` VALUES
+    -> ('20000001','김치우동',2,'2020-11-26','0001'),
+    -> ('20000002','튀김우동',1,'2020-12-25','0002');
+Query OK, 2 rows affected (0.003 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> ALTER TABLE register ADD or_number CHAR(4);
+Query OK, 0 rows affected (0.006 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [termproject1]> ALTER TABLE delivery ADD or_number CHAR(4);
+Query OK, 0 rows affected (0.005 sec)
+Records: 0  Duplicates: 0  Warnings: 0
